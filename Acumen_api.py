@@ -1,4 +1,4 @@
-import streamlit as st
+eptimport streamlit as st
 import pandas as pd
 import requests
 
@@ -56,7 +56,8 @@ def process_file(file):
         }
         try:
             response = requests.post(url, headers=headers, json=data)
-        
+        except:
+            continue
         if response.status_code == 200:
             enriched_data = write(response.json())
             for column in enriched_data.columns:
