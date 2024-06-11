@@ -54,8 +54,8 @@ def process_file(file):
             "email": row['email'],
             "dataFilter": ['professional']
         }
-        
-        response = requests.post(url, headers=headers, json=data)
+        try:
+            response = requests.post(url, headers=headers, json=data)
         
         if response.status_code == 200:
             enriched_data = write(response.json())
