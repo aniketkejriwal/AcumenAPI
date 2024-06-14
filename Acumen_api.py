@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import requests
+import streamlit_authenticator as stauth
 
 # Function to process the file
 def process_file(file):
@@ -65,36 +66,45 @@ def process_file(file):
         else:
             print(f"Failed to fetch data for index {index}: {response.json()}")
     
-    # Save the updated DataFrame to a CSV file if needed
-    # df.to_csv('updated_file.csv', index=False)
-    
-            
-    
-    # Save the updated DataFrame to a CSV file if needed
-    # enriched_df.to_csv('updated_file.csv', index=False)
-
     return df
 
 def main():
-    st.title("VisitorIQ Pro : Profile Enhancement")
+    st.title("VisitorIQ Pro: Profile Enhancement")
 
-    uploaded_file = st.file_uploader("Choose a file", type=["csv"])
+    # User authentication
+    names = ["admin", "user"]
+    usernames = ["admin", "user"]
+    passwords = ["X7!kP@3n%wV9zQ#", "X7!kP@3n%wV9zQ#"]  # Ideally, use hashed passwords
 
-    if uploaded_file is not None:
-        # Process the file
-        processed_df = process_file(uploaded_file)
-        
-        # Display the processed dataframe
-        st.write("Processed Data:")
-        st.dataframe(processed_df)
+    authenticator = stauth.Authenticate(names, usernames, passwords, "app_name", "auth_key", cookie_expiry_days=30)
 
-        # Download the processed file
-        st.download_button(
-            label="Download Processed File",
-            data=processed_df.to_csv(index=False).encode('utf-8'),
-            file_name='enriched_report.csv',
-            mime='text/csv',
-        )
+    name, authentication_status, username = authenticator.login("Login", "main")
+
+    if authentication_status:
+        st.success(f"Welcome {name}")
+        uploaded_file = st.file_uploader("Choose a file", type=["csv"])
+
+        if uploaded_file is not None:
+            # Process the file
+            processed_df = process_file(uploaded_file)
+            
+            # Display the processed dataframe
+            st.write("Processed Data:")
+            st.dataframe(processed_df)
+
+            # Download the processed file
+            st.download_button(
+                label="Download Processed File",
+                data=processed_df.to_csv(index=False).encode('utf-8'),
+                file_name='enriched_report.csv',
+                mime='text/csv',
+            )
+
+    elif authentication_status is False:
+        st.error("Username/password is incorrect")
+
+    elif authentication_status is None:
+        st.warning("Please enter your username and password")
 
 if __name__ == "__main__":
     main()
