@@ -1,0 +1,21 @@
+credentials:
+  usernames:
+    rhaas:
+      email: robert@spheredsg.com
+      failed_login_attempts: 0 # Will be managed automatically
+      logged_in: False # Will be managed automatically
+      name: Robert Haas
+      password: X9f@2Lc&Qwz#7nP4 # Will be hashed automatically
+    guest:
+      email: guest@spheredsg.com
+      failed_login_attempts: 0 # Will be managed automatically
+      logged_in: False # Will be managed automatically
+      name: Guest User
+      password: $V8g!M5r#Dp3&Xk9 # Will be hashed automatically
+cookie:
+  expiry_days: 30
+  key: some_signature_key # Must be string
+  name: some_cookie_name
+pre-authorized:
+  emails:
+  - aniket.kej@gmail.com
