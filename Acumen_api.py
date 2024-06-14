@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import requests
+import streamlit_authenticator as stauth
 
 # Function to process the file
 def process_file(file):
