@@ -107,7 +107,11 @@ def main():
     
         if uploaded_file is not None:
             # Process the file
-            processed_df = process_file(uploaded_file)
+            try:
+                processed_df = process_file(uploaded_file)
+            except BrokenPipeError:
+                st.error("A BrokenPipeError occurred. Please try again later.")
+
             
             # Display the processed dataframe
             st.write("Processed Data:")
