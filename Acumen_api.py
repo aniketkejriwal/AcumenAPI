@@ -107,12 +107,6 @@ def main():
     
         if uploaded_file is not None:
             # Process the file
-            try:
-                processed_df = process_file(uploaded_file)
-            except BrokenPipeError:
-                st.error("A BrokenPipeError occurred. Please try again later.")
-
-            
             # Display the processed dataframe
             st.write("Processed Data:")
             st.dataframe(processed_df)
@@ -124,6 +118,15 @@ def main():
                 file_name='enriched_report.csv',
                 mime='text/csv',
             )
+            try:
+                processed_df = process_file(uploaded_file)
+            except BrokenPipeError as e:
+                st.error(f"A BrokenPipeError occurred: {e}")
+            except Exception as e:
+                st.error(f"An error occurred: {e}")
+
+            
+            
 
 if __name__ == "__main__":
     main()
