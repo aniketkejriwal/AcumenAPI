@@ -121,9 +121,14 @@ def main():
                     mime='text/csv',
                 )
             except BrokenPipeError as e:
-                st.error(f"A BrokenPipeError occurred: {e}")
+                st.error("A BrokenPipeError occurred.")
+                st.error(f"{e}")
+                st.error(traceback.format_exc())
             except Exception as e:
-                st.error(f"An error occurred: {e}")
+                st.error("An error occurred.")
+                st.error(f"{e}")
+                st.error(traceback.format_exc())
+
 
             
             
