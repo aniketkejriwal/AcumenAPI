@@ -2,6 +2,9 @@ import streamlit as st
 import pandas as pd
 import requests
 import streamlit_authenticator as stauth
+import yaml
+import logging
+from yaml.loader import SafeLoader
 
 
 # Function to process the file
