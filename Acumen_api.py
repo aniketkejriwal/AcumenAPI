@@ -122,12 +122,6 @@ def main():
                 )
             except BrokenPipeError as e:
                 st.error("A BrokenPipeError occurred.")
-                st.error(f"{e}")
-                st.error(traceback.format_exc())
-            except Exception as e:
-                st.error("An error occurred.")
-                st.error(f"{e}")
-                st.error(traceback.format_exc())
 
 
             
