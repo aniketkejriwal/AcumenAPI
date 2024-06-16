@@ -107,6 +107,7 @@ def main():
     
         if uploaded_file is not None:
             # Process the file
+            processed_df = process_file(uploaded_file)
             # Display the processed dataframe
             st.write("Processed Data:")
             st.dataframe(processed_df)
