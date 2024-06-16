@@ -110,24 +110,19 @@ def main():
     
         if uploaded_file is not None:
             # Process the file
-            try:
-                processed_df = process_file(uploaded_file)
-                # Display the processed dataframe
-                st.write("Processed Data:")
-                st.dataframe(processed_df)
-        
-                # Download the processed file
-                st.download_button(
-                    label="Download Processed File",
-                    data=processed_df.to_csv(index=False).encode('utf-8'),
-                    file_name='enriched_report.csv',
-                    mime='text/csv',
-                )
-            except BrokenPipeError as e:
-                st.error("A BrokenPipeError occurred.")
-
-
-            
+            processed_df = process_file(uploaded_file)
+            # Display the processed dataframe
+            st.write("Processed Data:")
+            st.dataframe(processed_df)
+    
+            # Download the processed file
+            st.download_button(
+                label="Download Processed File",
+                data=processed_df.to_csv(index=False).encode('utf-8'),
+                file_name='enriched_report.csv',
+                mime='text/csv',
+            )
+          
             
 
 if __name__ == "__main__":
