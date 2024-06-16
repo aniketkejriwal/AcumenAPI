@@ -6,30 +6,39 @@ import yaml
 import logging
 from yaml.loader import SafeLoader
 
-# Set up logging
-logging.basicConfig(level=logging.INFO)
 
 # Function to process the file
 def process_file(file):
+    # Assuming the file is a CSV, you can process it with pandas
     df = pd.read_csv(file)
     url = "https://api.fullcontact.com/v3/person.enrich"
-    api_key = st.secrets["fullcontact_api_key"]
+    api_key = "gAUBIGSXPTPMzdLaALN4PgW2sWP0Bo7B"
     headers = {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json"
     }
-
+    
+    # Function to safely get a nested dictionary value
     def safe_get(dictionary, keys, default=None):
+        """
+        Safely get a nested dictionary value.
+        
+        :param dictionary: The dictionary to get the value from.
+        :param keys: A list of keys representing the nested path.
+        :param default: The default value to return if any key is not found.
+        :return: The value or the default.
+        """
         for key in keys:
             try:
                 dictionary = dictionary[key]
             except (KeyError, IndexError, TypeError):
                 return default
         return dictionary
-
+    
+    # Function to flatten the JSON response
     def write(data):
         details = data.get('details', {})
-        enriched_df = pd.DataFrame({
+        df = pd.DataFrame({
             'Current Organization Job Title': [safe_get(details, ['employment', 0, 'title'])],
             'Current Organization Name': [safe_get(details, ['employment', 0, 'name'])],
             'Current Organization Start Year': [safe_get(details, ['employment', 0, 'start', 'year'])],
@@ -42,8 +51,9 @@ def process_file(file):
             'Current Organization Region Code': [safe_get(details, ['locations', 0, 'regionCode'])],
             'Current Organization Country': [safe_get(details, ['locations', 0, 'country'])]
         })
-        return enriched_df
-
+        return df
+    
+    # Iterate over the DataFrame and enrich data
     for index, row in df.iterrows():
         data = {
             "email": row['email'],
@@ -51,26 +61,33 @@ def process_file(file):
         }
         try:
             response = requests.post(url, headers=headers, json=data)
-            response.raise_for_status()
-        except requests.RequestException as e:
-            logging.error(f"Request failed for index {index}: {e}")
+        except:
             continue
-
         if response.status_code == 200:
             enriched_data = write(response.json())
             for column in enriched_data.columns:
                 df.at[index, column] = enriched_data.at[0, column]
         else:
-            logging.error(f"Failed to fetch data for index {index}: {response.json()}")
+            print(f"Failed to fetch data for index {index}: {response.json()}")
+    
+    # Save the updated DataFrame to a CSV file if needed
+    # df.to_csv('updated_file.csv', index=False)
+    
+            
+    
+    # Save the updated DataFrame to a CSV file if needed
+    # enriched_df.to_csv('updated_file.csv', index=False)
 
     return df
 
 def main():
     st.title("VisitorIQ Pro : Profile Enhancement")
-
+    import yaml
+    from yaml.loader import SafeLoader
+    
     with open("config.yaml") as file:
         config = yaml.load(file, Loader=SafeLoader)
-
+    
     authenticator = stauth.Authenticate(
         config['credentials'],
         config['cookie']['name'],
@@ -78,28 +95,40 @@ def main():
         config['cookie']['expiry_days'],
         config['pre-authorized']
     )
-    name, authentication_status, username = authenticator.login("Login", "main")
+    authenticator.login()
 
-    if authentication_status:
-        authenticator.logout("Logout", "main")
-        st.write(f'Welcome *{name}*')
-        uploaded_file = st.file_uploader("Choose a file", type=["csv"])
-
-        if uploaded_file is not None:
-            processed_df = process_file(uploaded_file)
-            st.write("Processed Data:")
-            st.dataframe(processed_df)
-
-            st.download_button(
-                label="Download Processed File",
-                data=processed_df.to_csv(index=False).encode('utf-8'),
-                file_name='enriched_report.csv',
-                mime='text/csv'
-            )
-    elif authentication_status is False:
+    if st.session_state["authentication_status"]:
+        authenticator.logout()
+        st.write(f'Welcome *{st.session_state["name"]}*')
+    elif st.session_state["authentication_status"] is False:
         st.error('Username/password is incorrect')
-    elif authentication_status is None:
+    elif st.session_state["authentication_status"] is None:
         st.warning('Please enter your username and password')
+
+    if st.session_state["authentication_status"]:
+        uploaded_file = st.file_uploader("Choose a file", type=["csv"])
+    
+        if uploaded_file is not None:
+            # Process the file
+            try:
+                processed_df = process_file(uploaded_file)
+                # Display the processed dataframe
+                st.write("Processed Data:")
+                st.dataframe(processed_df)
+        
+                # Download the processed file
+                st.download_button(
+                    label="Download Processed File",
+                    data=processed_df.to_csv(index=False).encode('utf-8'),
+                    file_name='enriched_report.csv',
+                    mime='text/csv',
+                )
+            except BrokenPipeError as e:
+                st.error("A BrokenPipeError occurred.")
+
+
+            
+            
 
 if __name__ == "__main__":
     main()
